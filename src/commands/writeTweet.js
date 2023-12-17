@@ -2,13 +2,15 @@ const { TwitterApi } = require("twitter-api-v2");
 
 const appKey = process.env.TWITTER_API_KEY;
 const appSecret = process.env.TWITTER_API_KEY_SECRET;
+const accessToken = process.env.TWITTER_ACCESS_TOKEN;
+const accessSecret = process.env.TWITTER_ACCESS_TOKEN_SECRET;
 
-async function writeTweet(oauth_token, oauth_verifier, text) {
+async function writeTweet(text) {
   const client = new TwitterApi({
     appKey: appKey,
     appSecret: appSecret,
-    accessToken: oauth_token,
-    accessSecret: oauth_verifier,
+    accessToken: accessToken,
+    accessSecret: accessSecret,
   });
 
   const rwClient = client.readWrite;

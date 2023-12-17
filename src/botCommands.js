@@ -20,9 +20,7 @@ async function handleCommand(requestObject) {
   } else if (command === "/weather") {
     response = await getWeather(restText);
   } else if (command === "/tweet") {
-    const { oauth_token, oauth_verifier } = await getTwitterCreds(userName);
-
-    response = await writeTweet(oauth_verifier, oauth_token, restText);
+    response = await writeTweet(restText);
   } else {
     response = "Invalid Command";
   }
