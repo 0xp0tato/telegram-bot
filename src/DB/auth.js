@@ -1,14 +1,19 @@
+const bcrypt = require("bcryptjs");
 const User = require("./models/userSchema.js");
 
 async function registerUser(username, password) {
   try {
-    const existingUser = await User.findOne({ username: username });
+    const existingUser = await User.findOne(
+      { username: username },
+      { password: password }
+    );
 
     if (existingUser) {
       return { success: false, message: "Username already exists" };
     }
 
-    const newUser = new User({ username, password });
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
+    const newUser = new User({ username, password: hashedPassword });
     await newUser.save();
 
     return { success: true, message: "User created successfully" };
@@ -23,6 +28,12 @@ async function loginUser(username, password) {
     const user = await User.findOne({ username, password });
 
     if (!user) {
+      return { success: false, message: "Invalid credentials" };
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password); // Compare hashed passwords
+
+    if (!passwordMatch) {
       return { success: false, message: "Invalid credentials" };
     }
 
