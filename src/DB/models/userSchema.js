@@ -3,11 +3,12 @@ const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema({
   userId: Number,
   firstName: String,
-  userName: String,
+  username: String,
   twitterCreds: {
     oauth_token: String,
-    oauth_verifier: String,
+    oauth_token_secret: String,
   },
+  password: String,
   commands: [
     {
       timeStamp: Date,

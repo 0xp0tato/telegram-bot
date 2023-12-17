@@ -8,35 +8,66 @@ const session = require("express-session");
 const passport = require("passport");
 const { SetupPassport } = require("./passportSetup");
 const { storeTwitterData } = require("./DB/storeTwitterData");
+const { registerUser, loginUser } = require("./DB/auth");
+const { generateToken, verifyToken } = require("./jwt");
 
 const app = express();
-app.use(express.json());
 app.use(cors());
-app.use(
-  session({
-    secret: "keyboard cat",
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+app.use(express.json());
+// app.use(
+//   session({
+//     secret: "keyboard cat",
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// );
 
 require("dotenv").config();
 
-const token = process.env.BOT_TOKEN;
+const TelegramBotToken = process.env.BOT_TOKEN;
 const PORT = process.env.PORT || 3000;
 
-const bot = new TelegramBot(token, { polling: true });
-let username;
+const bot = new TelegramBot(TelegramBotToken, { polling: true });
+connectToDB();
 
-SetupPassport();
+// SetupPassport();
 
-app.get("/get-data", async function (req, res) {
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+
+  const result = await registerUser(username, password);
+
+  if (result.success) {
+    res.status(201).json({ message: result.message });
+  } else {
+    res.status(400).json({ message: result.message });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  const result = await loginUser(username, password);
+
+  if (result.success) {
+    const jwtToken = generateToken(username);
+    res.status(200).json({
+      message: result.message,
+      userId: result.user._id,
+      jwtToken: jwtToken,
+    });
+  } else {
+    res.status(401).json({ message: result.message });
+  }
+});
+
+app.get("/get-data", verifyToken, async function (req, res) {
   const data = await getData();
 
   res.send(data);
 });
 
-app.get("/api/auth/twitter", (req, res, next) => {
+app.get("/api/auth/twitter", verifyToken, (req, res, next) => {
   username = req.query.username;
 
   passport.authenticate("twitter")(req, res, next);
@@ -48,14 +79,12 @@ app.get(
   async function (req, res) {
     // Successful authentication, redirect home.
     console.log(req.query);
-    const { oauth_token, oauth_verifier } = req.query;
     res.redirect("http://localhost:5173?success=true");
   }
 );
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`);
-  connectToDB();
 
   // Matches "/[whatever]"
   bot.onText(/\/(.+)/, async (msg, match) => {
@@ -79,11 +108,3 @@ app.listen(PORT, () => {
     bot.sendMessage(userId, response);
   });
 });
-
-// bot.on("message", (msg) => {
-//   console.log(msg);
-//   const chatId = msg.chat.id;
-
-//   // send a message to the chat acknowledging receipt of their message
-//   bot.sendMessage(chatId, "Received your message");
-// });

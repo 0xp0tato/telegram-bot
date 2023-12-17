@@ -21,7 +21,6 @@ const SetupPassport = () => {
         callbackURL: "http://localhost:3000/auth/twitter/callback",
       },
       async function (token, tokenSecret, profile, cb) {
-        await storeTwitterDatareTwitterData(username, token, tokenSecret);
         cb(null, token, tokenSecret, profile);
       }
     )
