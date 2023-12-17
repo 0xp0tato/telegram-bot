@@ -25,9 +25,11 @@ async function registerUser(username, password) {
 
 async function loginUser(username, password) {
   try {
-    const user = await User.findOne({ username, password });
+    const user = await User.findOne({ username });
 
-    if (!user) {
+    console.log(user);
+
+    if (!user || !user.password) {
       return { success: false, message: "Invalid credentials" };
     }
 
