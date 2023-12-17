@@ -4,6 +4,7 @@ const UserSchema = new mongoose.Schema({
   userId: Number,
   firstName: String,
   username: String,
+  isAdmin: Boolean,
   twitterCreds: {
     oauth_token: String,
     oauth_token_secret: String,
