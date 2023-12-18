@@ -49,11 +49,14 @@ app.post("/login", async (req, res) => {
 
   const result = await loginUser(username, password);
 
+  console.log("-------", result);
+
   if (result.success) {
     const jwtToken = generateToken(username);
     res.status(200).json({
       message: result.message,
-      userId: result.user._id,
+      username: result.user.username,
+      isAdmin: result.user.isAdmin,
       jwtToken: jwtToken,
     });
   } else {

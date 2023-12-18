@@ -13,7 +13,11 @@ async function registerUser(username, password) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10); // Hash the password
-    const newUser = new User({ username, password: hashedPassword });
+    const newUser = new User({
+      username,
+      password: hashedPassword,
+      isAdmin: false,
+    });
     await newUser.save();
 
     return { success: true, message: "User created successfully" };
@@ -26,8 +30,6 @@ async function registerUser(username, password) {
 async function loginUser(username, password) {
   try {
     const user = await User.findOne({ username });
-
-    console.log(user);
 
     if (!user || !user.password) {
       return { success: false, message: "Invalid credentials" };
